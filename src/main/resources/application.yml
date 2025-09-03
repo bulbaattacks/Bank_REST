@@ -1,4 +1,8 @@
 spring:
+  jpa:
+    properties:
+      hibernate:
+        default_schema: bank
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/bank-app-db
@@ -7,6 +11,13 @@ spring:
 
   liquibase:
     change-log: classpath:/db/db.changelog-master.yaml
+
+application:
+  security:
+    jwt:
+      secret-key: S2pjZHJpdmFPUkVlYWtqR21iT3prSmwycmdkdjh3ZE8=
+      expiration: 86400000
+      refresh-expiration: 86400000
 
 #Что нужно сделать:
 #  - Указать настройки подключения к базе данных.

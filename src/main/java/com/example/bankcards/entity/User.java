@@ -1,7 +1,13 @@
 package com.example.bankcards.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
+@Builder
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
 public class User {
