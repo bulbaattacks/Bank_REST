@@ -10,6 +10,10 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=bank-app-db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
 
 #
 # docker-compose.yml — определяет сервисы для разработки и тестирования.
