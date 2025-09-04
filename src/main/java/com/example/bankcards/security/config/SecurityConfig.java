@@ -75,6 +75,8 @@ public class SecurityConfig {
                                 .requestMatchers(POST, "/card/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers(PATCH, "/card/**").hasAnyRole(ADMIN.name())
                                 .requestMatchers(DELETE, "/card/**").hasAnyRole(ADMIN.name())
+                                .requestMatchers("/card_to_block/block").hasAnyRole(ADMIN.name())
+                                .requestMatchers("/card_to_block/add").hasAnyRole(ADMIN.name(), USER.name())
                                 .anyRequest()
                                 .authenticated()
                 )
