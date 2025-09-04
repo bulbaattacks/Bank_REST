@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static com.example.bankcards.entity.User.Role.ADMIN;
 import static com.example.bankcards.entity.User.Role.USER;
+import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -69,6 +70,11 @@ public class SecurityConfig {
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()
                                 .requestMatchers("/user/**").hasAnyRole(ADMIN.name(), USER.name())
+                                .requestMatchers(GET, "/card").hasAnyRole(ADMIN.name())
+                                .requestMatchers(GET, "/card/{id}").hasAnyRole(ADMIN.name(), USER.name())
+                                .requestMatchers(POST, "/card/**").hasAnyRole(ADMIN.name())
+                                .requestMatchers(PATCH, "/card/**").hasAnyRole(ADMIN.name())
+                                .requestMatchers(DELETE, "/card/**").hasAnyRole(ADMIN.name())
                                 .anyRequest()
                                 .authenticated()
                 )

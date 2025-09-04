@@ -1,6 +1,7 @@
 package com.example.bankcards.controller;
 
 import com.example.bankcards.entity.User;
+import com.example.bankcards.exception.EntityNotFoundException;
 import com.example.bankcards.repository.UserRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,6 @@ public class UserController {
         if (authenticatedUser.getRole() != User.Role.ADMIN && !authenticatedUser.getId().equals(id)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        return userRepository.findById(id).orElseThrow();
+        return userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id));
     }
 }
