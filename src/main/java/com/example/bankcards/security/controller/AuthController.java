@@ -1,9 +1,9 @@
-package com.example.bankcards.controller;
+package com.example.bankcards.security.controller;
 
-import com.example.bankcards.dto.AuthRequest;
-import com.example.bankcards.dto.AuthResponse;
-import com.example.bankcards.dto.RegisterRequest;
-import com.example.bankcards.service.AuthService;
+import com.example.bankcards.security.dto.AuthRequest;
+import com.example.bankcards.security.dto.AuthResponse;
+import com.example.bankcards.security.service.AuthService;
+import com.example.bankcards.security.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

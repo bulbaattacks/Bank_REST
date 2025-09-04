@@ -1,10 +1,10 @@
-package com.example.bankcards.service;
+package com.example.bankcards.security.service;
 
-import com.example.bankcards.dto.AuthRequest;
-import com.example.bankcards.dto.AuthResponse;
-import com.example.bankcards.dto.RegisterRequest;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.security.dto.AuthRequest;
+import com.example.bankcards.security.dto.AuthResponse;
+import com.example.bankcards.security.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

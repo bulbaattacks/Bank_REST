@@ -1,4 +1,4 @@
-package com.example.bankcards.dto;
+package com.example.bankcards.security.dto;
 
 import com.example.bankcards.entity.User;
 import lombok.Getter;
