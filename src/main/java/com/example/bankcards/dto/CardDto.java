@@ -2,7 +2,10 @@ package com.example.bankcards.dto;
 
 import com.example.bankcards.entity.Card;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,8 +18,10 @@ import java.time.LocalDate;
 public class CardDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
-    @NotNull
-    private Integer number;
+    @NotBlank
+    @Size(min = 16, max = 16)
+    @Pattern(regexp = "^[0-9]*$")
+    private String number;
     @NotNull
     private Long ownerId;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -24,12 +29,8 @@ public class CardDto {
     @NotNull
     private Card.Status status;
 
-    public static CardDto map(Card entity) {
-        return CardDto.builder()
-                .id(entity.getId())
-                .number(entity.getNumber())
-                .ownerId(entity.getUser().getId())
-                .status(entity.getStatus())
-                .build();
+    public void hideNumber() {
+        var subNumber = number.substring(12);
+        number = "**** **** **** " + subNumber;
     }
 }

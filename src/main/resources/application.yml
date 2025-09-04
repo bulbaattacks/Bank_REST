@@ -20,6 +20,8 @@ application:
       secret-key: S2pjZHJpdmFPUkVlYWtqR21iT3prSmwycmdkdjh3ZE8=
       expiration: 86400000
       refresh-expiration: 86400000
+  encryption:
+    key: d3JtUjlIR1kyeFluNmF6VDUyd1lDbTZPNkFxQUw3RVA=
 
 logging:
   level:

@@ -19,12 +19,13 @@ public class CardService {
 
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
+    private final EncryptionServiceDes encryptionService;
 
     public CardDto createCard(CardDto dto) {
         var userId = dto.getOwnerId();
         var user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(userId));
         var card = Card.builder()
-                .number(dto.getNumber())
+                .number(encryptionService.encrypt(dto.getNumber()))
                 .user(user)
                 .validityPeriod(LocalDate.now().plusYears(1))
                 .status(dto.getStatus())
@@ -33,18 +34,40 @@ public class CardService {
 
         dto.setId(card.getId());
         dto.setValidityPeriod(card.getValidityPeriod());
+        dto.setNumber(encryptionService.decrypt(card.getNumber()));
+        dto.hideNumber();
         return dto;
     }
 
     public List<CardDto> getAllCards() {
         return cardRepository.findAll().stream()
-                .map(CardDto::map)
+                .map(entity -> {
+                    var card = CardDto.builder()
+                            .id(entity.getId())
+                            .number(encryptionService.decrypt(entity.getNumber()))
+                            .ownerId(entity.getUser().getId())
+                            .validityPeriod(entity.getValidityPeriod())
+                            .status(entity.getStatus())
+                            .build();
+                    card.hideNumber();
+                    return card;
+                })
                 .toList();
     }
 
     public List<CardDto> getCardsByUserId(Long userId) {
         return cardRepository.getAllByUserId(userId).stream()
-                .map(CardDto::map)
+                .map(entity -> {
+                    var card = CardDto.builder()
+                            .id(entity.getId())
+                            .number(encryptionService.decrypt(entity.getNumber()))
+                            .ownerId(entity.getUser().getId())
+                            .validityPeriod(entity.getValidityPeriod())
+                            .status(entity.getStatus())
+                            .build();
+                    card.hideNumber();
+                    return card;
+                })
                 .toList();
     }
 
