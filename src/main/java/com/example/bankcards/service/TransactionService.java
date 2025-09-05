@@ -2,71 +2,95 @@ package com.example.bankcards.service;
 
 import com.example.bankcards.dto.DepositDto;
 import com.example.bankcards.dto.TransactionDto;
+import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.Transaction;
+import com.example.bankcards.exception.*;
 import com.example.bankcards.repository.CardRepository;
-import com.example.bankcards.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
 
     private final CardRepository cardRepository;
-    private final TransactionRepository transactionRepository;
-
-    private final ConcurrentHashMap<Long, Long> cardBalanceCashe = new ConcurrentHashMap<>();
+    private final TransactionCacheService transactionCacheService;
 
     public void createTransaction(TransactionDto dto, Long ownerId) {
-        var fromCard = cardRepository.findByIdAndUserId(dto.getFromCard(), ownerId).orElseThrow();
-        var toCard = cardRepository.findByIdAndUserId(dto.getToCard(), ownerId).orElseThrow();
+        var fromCard = cardRepository.findByIdAndUserId(dto.getFromCard(), ownerId)
+                .orElseThrow(() -> new CardOwnerException(dto.getFromCard(), ownerId));
+        var toCard = cardRepository.findByIdAndUserId(dto.getToCard(), ownerId)
+                .orElseThrow(() -> new CardOwnerException(dto.getToCard(), ownerId));
+
+        cardIsActive(fromCard);
+        cardIsActive(toCard);
 
         var balanceFromCard = getBalanceFromCache(fromCard.getId());
         if (balanceFromCard - dto.getAmount() < 0) {
-            throw new RuntimeException("Not enough money on card");
+            throw new InsufficientFundsException(fromCard.getId());
         }
 
         var transaction = Transaction.builder()
                 .fromCard(fromCard)
                 .toCard(toCard)
                 .amount(dto.getAmount())
+                .user(fromCard.getUser())
                 .build();
-        transactionRepository.save(transaction);
-
-        findInDbAndUpdateCache(fromCard.getId());
-        findInDbAndUpdateCache(toCard.getId());
+        transactionCacheService.save(transaction, fromCard.getId(), toCard.getId());
     }
 
     public void deposit(DepositDto dto) {
-        var toCard = cardRepository.findByIdAndIsAtmFalse(dto.getToCardId()).orElseThrow();
-        var atm = cardRepository.findFirstByIsAtmTrue().orElseThrow();
+        var toCard = cardRepository.findByIdAndIsAtmFalse(dto.getToCardId())
+                .orElseThrow(() -> new EntityNotFoundException(dto.getToCardId()));
+        cardIsActive(toCard);
+        var atm = cardRepository.findFirstByIsAtmTrue()
+                .orElseThrow(ATMNotFoundException::new);
 
         var transaction = Transaction.builder()
                 .fromCard(atm)
                 .toCard(toCard)
                 .amount(dto.getAmount())
+                .user(toCard.getUser())
                 .build();
-        transactionRepository.save(transaction);
-        findInDbAndUpdateCache(toCard.getId());
+        transactionCacheService.save(transaction, toCard.getId());
     }
 
     public Long getBalanceFromCache(Long cardId) {
-
-        var balance = cardBalanceCashe.get(cardId);
-        return balance != null ? balance : findInDbAndUpdateCache(cardId);
+        return transactionCacheService.getBalanceFromCache(cardId);
     }
 
-    private Long findInDbAndUpdateCache(Long cardId) {
-        var balance = getBalance(cardId);
-        cardBalanceCashe.put(cardId, balance);
-        return balance;
+    public List<TransactionDto> getAllTransactionHistory() {
+        return transactionCacheService.findAll().stream()
+                .map(entity -> {
+                    var dto = new TransactionDto();
+                    dto.setFromCard(entity.getFromCard().getId());
+                    dto.setToCard(entity.getToCard().getId());
+                    dto.setAmount(entity.getAmount());
+                    dto.setLogin(entity.getUser().getLogin());
+                    return dto;
+                })
+                .toList();
     }
 
-    private Long getBalance(Long cardId) {
-        var depositAmount = transactionRepository.countDepositAmount(cardId);
-        var withdrawAmount = transactionRepository.countWithdrawAmount(cardId);
-        return depositAmount - withdrawAmount;
+    public List<TransactionDto> getTransactionHistoryByUserId(Long userId) {
+        return transactionCacheService.findAllByUserId(userId).stream()
+                .map(entity -> {
+                    var dto = new TransactionDto();
+                    dto.setFromCard(entity.getFromCard().getId());
+                    dto.setToCard(entity.getToCard().getId());
+                    dto.setAmount(entity.getAmount());
+                    dto.setLogin(entity.getUser().getLogin());
+                    return dto;
+                })
+                .toList();
+    }
+
+    private void cardIsActive(Card card) {
+        if (card.getStatus() != Card.Status.ACTIVE) {
+            throw new CardStatusException(card.getId());
+        }
     }
 }

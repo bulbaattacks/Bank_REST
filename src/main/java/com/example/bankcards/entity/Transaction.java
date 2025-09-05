@@ -1,10 +1,14 @@
 package com.example.bankcards.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Entity
 @Table(name = "transactions")
@@ -22,4 +26,8 @@ public class Transaction {
     private Card toCard;
 
     private Long amount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
