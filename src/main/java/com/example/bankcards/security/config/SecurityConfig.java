@@ -43,7 +43,8 @@ public class SecurityConfig {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/docs/openapi.yaml"
     };
 
     private final UserDetailsService userDetailsService;

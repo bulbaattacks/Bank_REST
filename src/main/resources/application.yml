@@ -37,11 +37,12 @@ logging:
         security: DEBUG
 
 server:
+  port: 8080
   error:
     include-message: always
 
-#Что нужно сделать:
-#  - Указать настройки подключения к базе данных.
-#  - Указать порт приложения.
-#  - Настроить параметры безопасности и JWT.
-#  - Включить Swagger UI.
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    url: docs/openapi.yaml
