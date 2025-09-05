@@ -7,8 +7,10 @@ import com.example.bankcards.entity.Transaction;
 import com.example.bankcards.exception.*;
 import com.example.bankcards.repository.CardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -38,13 +40,14 @@ public class TransactionService {
                 .toCard(toCard)
                 .amount(dto.getAmount())
                 .user(fromCard.getUser())
+                .date(LocalDate.now())
                 .build();
         transactionCacheService.save(transaction, fromCard.getId(), toCard.getId());
     }
 
     public void deposit(DepositDto dto) {
         var toCard = cardRepository.findByIdAndIsAtmFalse(dto.getToCardId())
-                .orElseThrow(() -> new EntityNotFoundException(dto.getToCardId()));
+                .orElseThrow(() -> new CardNotFoundException(dto.getToCardId()));
         cardIsActive(toCard);
         var atm = cardRepository.findFirstByIsAtmTrue()
                 .orElseThrow(ATMNotFoundException::new);
@@ -54,6 +57,7 @@ public class TransactionService {
                 .toCard(toCard)
                 .amount(dto.getAmount())
                 .user(toCard.getUser())
+                .date(LocalDate.now())
                 .build();
         transactionCacheService.save(transaction, toCard.getId());
     }
@@ -62,27 +66,29 @@ public class TransactionService {
         return transactionCacheService.getBalanceFromCache(cardId);
     }
 
-    public List<TransactionDto> getAllTransactionHistory() {
-        return transactionCacheService.findAll().stream()
+    public List<TransactionDto> getAllTransactionHistory(Pageable pageable, Long amountFilter) {
+        return transactionCacheService.findAll(pageable, amountFilter).stream()
                 .map(entity -> {
                     var dto = new TransactionDto();
                     dto.setFromCard(entity.getFromCard().getId());
                     dto.setToCard(entity.getToCard().getId());
                     dto.setAmount(entity.getAmount());
                     dto.setLogin(entity.getUser().getLogin());
+                    dto.setDate(entity.getDate());
                     return dto;
                 })
                 .toList();
     }
 
-    public List<TransactionDto> getTransactionHistoryByUserId(Long userId) {
-        return transactionCacheService.findAllByUserId(userId).stream()
+    public List<TransactionDto> getTransactionHistoryByUserId(Long userId, Pageable pageable, Long amountFilter) {
+        return transactionCacheService.findAllByUserId(userId, pageable, amountFilter).stream()
                 .map(entity -> {
                     var dto = new TransactionDto();
                     dto.setFromCard(entity.getFromCard().getId());
                     dto.setToCard(entity.getToCard().getId());
                     dto.setAmount(entity.getAmount());
                     dto.setLogin(entity.getUser().getLogin());
+                    dto.setDate(entity.getDate());
                     return dto;
                 })
                 .toList();
@@ -90,7 +96,7 @@ public class TransactionService {
 
     private void cardIsActive(Card card) {
         if (card.getStatus() != Card.Status.ACTIVE) {
-            throw new CardStatusException(card.getId());
+            throw new CardStatusNotActiveException(card.getId());
         }
     }
 }

@@ -7,4 +7,3 @@ databaseChangeLog:
       file: classpath:/db/migration/03-create-blocked-cards-table.sql
   - include:
       file: classpath:/db/migration/04-transactions-table.sql
-

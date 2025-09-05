@@ -2,13 +2,13 @@ package com.example.bankcards.service;
 
 import com.example.bankcards.dto.CardDto;
 import com.example.bankcards.entity.Card;
-import com.example.bankcards.exception.EntityNotFoundException;
+import com.example.bankcards.exception.CardNotFoundException;
+import com.example.bankcards.exception.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +24,7 @@ public class CardService {
 
     public CardDto createCard(CardDto dto) {
         var userId = dto.getOwnerId();
-        var user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(userId));
+        var user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         var card = Card.builder()
                 .number(encryptionService.encrypt(dto.getNumber()))
                 .user(user)
@@ -41,8 +41,8 @@ public class CardService {
         return dto;
     }
 
-    public List<CardDto> getAllCards() {
-        return cardRepository.findAllByIsAtmFalse().stream()
+    public List<CardDto> getAllCards(Pageable pageable, Card.Status statusFilter) {
+        return cardRepository.findAllByIsAtmFalseAndStatus(pageable, statusFilter).stream()
                 .map(entity -> {
                     var card = CardDto.builder()
                             .id(entity.getId())
@@ -60,6 +60,7 @@ public class CardService {
     }
 
     public List<CardDto> getCardsByUserId(Long userId) {
+        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         return cardRepository.getAllByUserId(userId).stream()
                 .map(entity -> {
                     var card = CardDto.builder()
@@ -80,12 +81,12 @@ public class CardService {
     public void updateStatus(Long id, Card.Status status) {
         var updateResult = cardRepository.updateStatus(id, status);
         if (updateResult == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new CardNotFoundException(id);
         }
     }
 
     public void deleteCard(Long id) {
-        var card = cardRepository.findByIdAndIsAtmFalse(id).orElseThrow(() -> new EntityNotFoundException(id));
+        var card = cardRepository.findByIdAndIsAtmFalse(id).orElseThrow(() -> new CardNotFoundException(id));
         cardRepository.delete(card);
     }
 }

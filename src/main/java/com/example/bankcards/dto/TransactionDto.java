@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Setter
 @Getter
 public class TransactionDto {
@@ -16,4 +18,6 @@ public class TransactionDto {
     private Long amount;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String login;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private LocalDate date;
 }

@@ -2,7 +2,7 @@ package com.example.bankcards.service;
 
 import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.CardToBlock;
-import com.example.bankcards.exception.EntityNotFoundException;
+import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.CardToBlockRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class CardToBlockService {
 
     public void addCardToBlock(Long cardId, Long ownerId) {
         var card = cardRepository.findByIdAndUserId(cardId, ownerId)
-                .orElseThrow(() -> new EntityNotFoundException(cardId));
+                .orElseThrow(() -> new CardNotFoundException(cardId));
         var cardToBlock = new CardToBlock();
         cardToBlock.setCard(card);
         cardToBlockRepository.save(cardToBlock);

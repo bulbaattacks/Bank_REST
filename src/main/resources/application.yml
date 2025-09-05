@@ -13,6 +13,10 @@ spring:
     url: jdbc:postgresql://localhost:5432/bank-app-db
     username: postgres
     password: postgres
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
 
   liquibase:
     change-log: classpath:/db/db.changelog-master.yaml

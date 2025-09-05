@@ -3,10 +3,10 @@ package com.example.bankcards.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-public class EntityNotFoundException extends ResponseStatusException {
-    public static final String MSG = "Entity id: %d, not found";
+public class UserNotFoundException extends ResponseStatusException {
+    public static final String MSG = "User id: %d, not found";
 
-    public EntityNotFoundException(Long id) {
+    public UserNotFoundException(Long id) {
         super(HttpStatus.BAD_REQUEST, MSG.formatted(id));
     }
 }
