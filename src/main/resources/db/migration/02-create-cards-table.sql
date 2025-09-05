@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS bank.cards (
     number            varchar(64) NOT NULL UNIQUE,
     user_id           bigint NOT NULL REFERENCES bank.users(id),
     validity_period   varchar(64) NOT NULL,
-    status            varchar(64) NOT NULL CHECK (status IN ('ACTIVE', 'BLOCKED', 'EXPIRED'))
+    status            varchar(64) NOT NULL CHECK (status IN ('ACTIVE', 'BLOCKED', 'EXPIRED')),
+    is_atm            boolean DEFAULT FALSE
 );
 

@@ -20,6 +20,7 @@ public class CardService {
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
     private final EncryptionServiceDes encryptionService;
+    private final TransactionService transactionService;
 
     public CardDto createCard(CardDto dto) {
         var userId = dto.getOwnerId();
@@ -40,7 +41,7 @@ public class CardService {
     }
 
     public List<CardDto> getAllCards() {
-        return cardRepository.findAll().stream()
+        return cardRepository.findAllByIsAtmFalse().stream()
                 .map(entity -> {
                     var card = CardDto.builder()
                             .id(entity.getId())
@@ -48,6 +49,8 @@ public class CardService {
                             .ownerId(entity.getUser().getId())
                             .validityPeriod(entity.getValidityPeriod())
                             .status(entity.getStatus())
+                            .isAtm(entity.isAtm())
+                            .balance(transactionService.getBalanceFromCache(entity.getId()))
                             .build();
                     card.hideNumber();
                     return card;
@@ -64,6 +67,8 @@ public class CardService {
                             .ownerId(entity.getUser().getId())
                             .validityPeriod(entity.getValidityPeriod())
                             .status(entity.getStatus())
+                            .isAtm(entity.isAtm())
+                            .balance(transactionService.getBalanceFromCache(entity.getId()))
                             .build();
                     card.hideNumber();
                     return card;
@@ -79,7 +84,7 @@ public class CardService {
     }
 
     public void deleteCard(Long id) {
-        var card = cardRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id));
+        var card = cardRepository.findByIdAndIsAtmFalse(id).orElseThrow(() -> new EntityNotFoundException(id));
         cardRepository.delete(card);
     }
 }

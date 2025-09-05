@@ -18,9 +18,17 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     @Transactional
     @Modifying
-    @Query("update Card c set c.status = :status where c.id = :id")
+    @Query("update Card c set c.status = :status where c.id = :id and c.isAtm is false")
     int updateStatus(@Param(value = "id") Long id, @Param(value = "status") Card.Status status);
 
     Optional<Card> findByIdAndUserId(Long cardId, Long userId);
+
+    Optional<Card> findByNumber(String number);
+
+    Optional<Card> findFirstByIsAtmTrue();
+
+    List<Card> findAllByIsAtmFalse();
+
+    Optional<Card> findByIdAndIsAtmFalse(Long cardId);
 }
 

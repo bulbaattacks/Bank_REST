@@ -26,6 +26,10 @@ public class CardDto {
     private LocalDate validityPeriod;
     @NotNull
     private Card.Status status;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean isAtm = Boolean.FALSE;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long balance;
 
     public void hideNumber() {
         var subNumber = number.substring(12);

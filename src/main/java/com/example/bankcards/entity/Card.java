@@ -6,10 +6,10 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Builder
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "cards")
 public class Card {
@@ -24,6 +24,7 @@ public class Card {
     private LocalDate validityPeriod;
     @Enumerated(EnumType.STRING)
     private Status status;
+    private boolean isAtm;
 
     public enum Status {ACTIVE, BLOCKED, EXPIRED}
 }
