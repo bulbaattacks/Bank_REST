@@ -36,6 +36,7 @@ public class SecurityConfig {
             "/account",
             "/v2/api-docs",
             "/v3/api-docs",
+            "/v3/api-docs.yaml",
             "/v3/api-docs/**",
             "/swagger-resources",
             "/swagger-resources/**",

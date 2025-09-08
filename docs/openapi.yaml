@@ -1,1 +1,589 @@
-# Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
+openapi: 3.1.0
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+tags:
+- name: Transactions
+  description: Операции с транзакциями и депозитами
+- name: Authentication
+  description: Регистрация и аутентификация пользователей
+- name: Users
+  description: Операции с пользователями
+- name: Cards
+  description: Операции с картами пользователей
+- name: Card To Block
+  description: Операции по добавлению и блокировке карт
+paths:
+  /transaction:
+    post:
+      tags:
+      - Transactions
+      summary: Создать транзакцию
+      description: Создаёт новую транзакцию от имени авторизованного пользователя.
+      operationId: createTransaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionDto"
+        required: true
+      responses:
+        "200":
+          description: Транзакция успешно создана
+        "400":
+          description: Некорректные данные запроса
+        "401":
+          description: Неавторизован
+      security:
+      - bearerAuth: []
+  /deposit:
+    post:
+      tags:
+      - Transactions
+      summary: Создать депозит
+      description: Вносит депозит на счёт пользователя.
+      operationId: createDeposit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositDto"
+        required: true
+      responses:
+        "200":
+          description: Депозит успешно создан
+        "400":
+          description: Некорректные данные запроса
+        "401":
+          description: Неавторизован
+      security:
+      - bearerAuth: []
+  /cards:
+    get:
+      tags:
+      - Cards
+      summary: Получить список всех карт
+      description: Возвращает список карт с возможностью фильтрации по статусу и пагинацией
+      operationId: getAllCards
+      parameters:
+      - name: statusFilter
+        in: query
+        description: Фильтр по статусу карты
+        required: false
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - EXPIRED
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        schema:
+          type: integer
+          default: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        schema:
+          type: integer
+          default: 20
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: Список карт успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardDto"
+        "401":
+          description: Неавторизован
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CardDto"
+        "403":
+          description: Доступ запрещён
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CardDto"
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Cards
+      summary: Создать новую карту
+      description: Создаёт новую карту на основе переданных данных
+      operationId: createCard
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CardDto"
+        required: true
+      responses:
+        "200":
+          description: Карта успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardDto"
+        "400":
+          description: Некорректные данные
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CardDto"
+      security:
+      - bearerAuth: []
+  /card_to_block/add/{cardId}:
+    post:
+      tags:
+      - Card To Block
+      summary: Добавить карту в список на блокировку
+      description: Добавляет карту в список для последующей блокировки. Доступно только
+        авторизованным пользователям.
+      operationId: addCardToBlock
+      parameters:
+      - name: cardId
+        in: path
+        description: "ID карты, которую нужно добавить в список блокировки"
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Карта успешно добавлена в список на блокировку
+        "401":
+          description: Неавторизован
+        "403":
+          description: Доступ запрещён
+        "404":
+          description: Карта не найдена
+      security:
+      - bearerAuth: []
+  /auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Регистрация нового пользователя
+      description: Создаёт нового пользователя в системе и возвращает токен авторизации.
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "200":
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Некорректные данные запроса
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /auth/authenticate:
+    post:
+      tags:
+      - Authentication
+      summary: Аутентификация пользователя
+      description: Проверяет логин и пароль пользователя и возвращает токен авторизации.
+      operationId: authenticate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+        required: true
+      responses:
+        "200":
+          description: Аутентификация успешна
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Некорректные данные запроса
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Неверный логин или пароль
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+  /cards/{id}:
+    delete:
+      tags:
+      - Cards
+      summary: Удалить карту
+      description: Удаляет карту по её ID
+      operationId: deleteCard
+      parameters:
+      - name: id
+        in: path
+        description: ID карты
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Карта успешно удалена
+        "404":
+          description: Карта не найдена
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - Cards
+      summary: Обновить статус карты
+      description: "Изменяет статус карты, кроме статуса EXPIRED"
+      operationId: updateStatus
+      parameters:
+      - name: id
+        in: path
+        description: ID карты
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: status
+        in: query
+        description: Новый статус карты
+        required: true
+        schema:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - EXPIRED
+      responses:
+        "200":
+          description: Статус успешно обновлён
+        "400":
+          description: Некорректный статус
+        "404":
+          description: Карта не найдена
+      security:
+      - bearerAuth: []
+  /user/{id}:
+    get:
+      tags:
+      - Users
+      summary: Получить данные пользователя
+      description: Возвращает данные пользователя по его ID. Доступно администратору
+        или самому пользователю.
+      operationId: getUser
+      parameters:
+      - name: id
+        in: path
+        description: ID пользователя
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Неавторизован
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+        "403":
+          description: Доступ запрещён
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Пользователь не найден
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
+      security:
+      - bearerAuth: []
+  /transaction_history:
+    get:
+      tags:
+      - Transactions
+      summary: Получить историю транзакций
+      description: "Возвращает историю транзакций. Администратор видит все транзак\
+        ции, обычный пользователь — только свои."
+      operationId: getTransactionHistory
+      parameters:
+      - name: amountFilter
+        in: query
+        description: Фильтр по сумме транзакции (опционально)
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        description: Параметры пагинации
+      - name: page
+        in: query
+        description: Zero-based page index (0..N)
+        schema:
+          type: integer
+          default: 0
+      - name: size
+        in: query
+        description: The size of the page to be returned
+        schema:
+          type: integer
+          default: 20
+      - name: sort
+        in: query
+        description: "Sorting criteria in the format: property,(asc|desc). Default\
+          \ sort order is ascending. Multiple sort criteria are supported."
+        schema:
+          type: array
+          items:
+            type: string
+      responses:
+        "200":
+          description: История транзакций
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionDto"
+        "401":
+          description: Неавторизован
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionDto"
+        "403":
+          description: Доступ запрещён
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransactionDto"
+      security:
+      - bearerAuth: []
+  /cards/{userId}:
+    get:
+      tags:
+      - Cards
+      summary: Получить карты пользователя
+      description: Доступно администратору или владельцу карт
+      operationId: getCardsByUserId
+      parameters:
+      - name: userId
+        in: path
+        description: ID пользователя
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Список карт пользователя
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardDto"
+        "403":
+          description: Доступ запрещён
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CardDto"
+      security:
+      - bearerAuth: []
+  /card_to_block/block:
+    get:
+      tags:
+      - Card To Block
+      summary: Заблокировать карты из списка
+      description: "Блокирует все карты, которые находятся в списке на блокировку\
+        . Доступно только авторизованным администраторам."
+      operationId: blockCards
+      responses:
+        "200":
+          description: Карты успешно заблокированы
+        "401":
+          description: Неавторизован
+        "403":
+          description: Доступ запрещён
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    TransactionDto:
+      type: object
+      properties:
+        fromCard:
+          type: integer
+          format: int64
+        toCard:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+        login:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          readOnly: true
+      required:
+      - amount
+      - fromCard
+      - toCard
+    DepositDto:
+      type: object
+      description: Данные депозита
+      properties:
+        toCardId:
+          type: integer
+          format: int64
+        amount:
+          type: integer
+          format: int64
+      required:
+      - amount
+      - toCardId
+    CardDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        number:
+          type: string
+          pattern: "^[0-9]{16,16}$"
+        ownerId:
+          type: integer
+          format: int64
+        validityPeriod:
+          type: string
+          format: date
+          readOnly: true
+        status:
+          type: string
+          enum:
+          - ACTIVE
+          - BLOCKED
+          - EXPIRED
+        isAtm:
+          type: boolean
+          readOnly: true
+        balance:
+          type: integer
+          format: int64
+          readOnly: true
+      required:
+      - number
+      - ownerId
+      - status
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
+    RegisterRequest:
+      type: object
+      description: Данные для регистрации пользователя
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum:
+          - ADMIN
+          - USER
+    AuthRequest:
+      type: object
+      description: Данные для входа пользователя
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    GrantedAuthority:
+      type: object
+      properties:
+        authority:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        login:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum:
+          - ADMIN
+          - USER
+        username:
+          type: string
+        authorities:
+          type: array
+          items:
+            $ref: "#/components/schemas/GrantedAuthority"
+        enabled:
+          type: boolean
+        credentialsNonExpired:
+          type: boolean
+        accountNonExpired:
+          type: boolean
+        accountNonLocked:
+          type: boolean
+  securitySchemes:
+    bearerAuth:
+      type: http
+      description: JWT auth
+      in: header
+      scheme: bearer
+      bearerFormat: JWT
