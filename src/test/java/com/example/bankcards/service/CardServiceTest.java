@@ -7,6 +7,7 @@ import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.exception.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.util.EncryptionUtilService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,7 @@ class CardServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private EncryptionServiceDes encryptionService;
+    private EncryptionUtilService encryptionService;
     @Mock
     private TransactionService transactionService;
     @InjectMocks

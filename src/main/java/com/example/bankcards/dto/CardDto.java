@@ -30,9 +30,4 @@ public class CardDto {
     private Boolean isAtm = Boolean.FALSE;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long balance;
-
-    public void hideNumber() {
-        var subNumber = number.substring(12);
-        number = "**** **** **** " + subNumber;
-    }
 }

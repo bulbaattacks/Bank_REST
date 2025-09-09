@@ -566,19 +566,19 @@ components:
           enum:
           - ADMIN
           - USER
-        username:
-          type: string
         authorities:
           type: array
           items:
             $ref: "#/components/schemas/GrantedAuthority"
+        username:
+          type: string
         enabled:
-          type: boolean
-        credentialsNonExpired:
           type: boolean
         accountNonExpired:
           type: boolean
         accountNonLocked:
+          type: boolean
+        credentialsNonExpired:
           type: boolean
   securitySchemes:
     bearerAuth:

@@ -1,4 +1,4 @@
-package com.example.bankcards.service;
+package com.example.bankcards.util;
 
 import io.jsonwebtoken.io.Decoders;
 import jakarta.annotation.PostConstruct;
@@ -14,7 +14,7 @@ import java.security.GeneralSecurityException;
 import java.util.Base64;
 
 @Service
-public class EncryptionServiceDes {
+public class EncryptionUtilService {
 
     @Value("${application.encryption.key}")
     private String key;

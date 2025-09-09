@@ -6,6 +6,8 @@ import com.example.bankcards.exception.CardNotFoundException;
 import com.example.bankcards.exception.UserNotFoundException;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
+import com.example.bankcards.util.CardNumberUtil;
+import com.example.bankcards.util.EncryptionUtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,7 @@ public class CardService {
 
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
-    private final EncryptionServiceDes encryptionService;
+    private final EncryptionUtilService encryptionService;
     private final TransactionService transactionService;
 
     public CardDto createCard(CardDto dto) {
@@ -37,7 +39,7 @@ public class CardService {
         dto.setValidityPeriod(card.getValidityPeriod());
         dto.setNumber(encryptionService.decrypt(card.getNumber()));
         dto.setBalance(transactionService.getBalanceFromCache(card.getId()));
-        dto.hideNumber();
+        CardNumberUtil.hide(dto);
         return dto;
     }
 
@@ -53,7 +55,7 @@ public class CardService {
                             .isAtm(entity.isAtm())
                             .balance(transactionService.getBalanceFromCache(entity.getId()))
                             .build();
-                    card.hideNumber();
+                    CardNumberUtil.hide(card);
                     return card;
                 })
                 .toList();
@@ -72,7 +74,7 @@ public class CardService {
                             .isAtm(entity.isAtm())
                             .balance(transactionService.getBalanceFromCache(entity.getId()))
                             .build();
-                    card.hideNumber();
+                    CardNumberUtil.hide(card);
                     return card;
                 })
                 .toList();

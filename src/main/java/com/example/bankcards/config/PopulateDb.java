@@ -4,7 +4,7 @@ import com.example.bankcards.entity.Card;
 import com.example.bankcards.entity.User;
 import com.example.bankcards.repository.CardRepository;
 import com.example.bankcards.repository.UserRepository;
-import com.example.bankcards.service.EncryptionServiceDes;
+import com.example.bankcards.util.EncryptionUtilService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ public class PopulateDb {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CardRepository cardRepository;
-    private final EncryptionServiceDes encryptionService;
+    private final EncryptionUtilService encryptionService;
 
     @PostConstruct
     private void populateUserAndCardTable() {
